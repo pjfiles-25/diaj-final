@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a237e">
+    <title>DIAJ - Dossier Informatisé des Antécédents Judiciaires</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #1a237e 0%, #3949ab 100%);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.5;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .header-title {
+            flex: 1;
+        }
+
+        .header-title h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header-title p {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .user-info {
+            text-align: right;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .search-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid #1a237e;
+        }
+
+        .search-panel h2 {
+            color: #1a237e;
+            margin-bottom: 20px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #1a237e;
+        }
+
+        .search-btn {
+            padding: 12px 25px;
+            background: #1a237e;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .search-btn:hover {
+            background: #0d47a1;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .add-section {
+            background: #f8f9fa;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .add-section:hover {
+            border-color: #1a237e;
+            background: #f0f7ff;
+        }
+
+        .add-section h3 {
+            color: #1a237e;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .add-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .file-input {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            background: #1a237e;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .file-input:hover {
+            background: #0d47a1;
+        }
+
+        .file-input input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .add-btn {
+            background: #28a745;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .add-btn:hover {
+            background: #218838;
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid #1a237e;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .results-header h2 {
+            color: #1a237e;
+            font-size: 18px;
+        }
+
+        .results-count {
+            background: #1a237e;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .result-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .result-image {
+            width: 100%;
+            height: 200px;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .result-content {
+            padding: 15px;
+        }
+
+        .result-title {
+            font-weight: bold;
+            color: #1a237e;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .result-type {
+            background: #6c757d;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .result-type.personne { background: #dc3545; }
+        .result-type.arme { background: #fd7e14; }
+        .result-type.adresse { background: #20c997; }
+        .result-type.vehicule { background: #6610f2; }
+        .result-type.piece { background: #6f42c1; }
+
+        .result-description {
+            color: #555;
+            font-size: 13px;
+            line-height: 1.4;
+            max-height: 80px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .result-meta {
+            margin-top: 10px;
+            font-size: 11px;
+            color: #888;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+            font-style: italic;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .modal-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .data-management {
+            background: #fff;
+            border: 1px solid #1a237e;
+            color: #1a237e;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .data-management button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 12px;
+        }
+
+        .data-management button:hover {
+            background: #0056b3;
+        }
+
+        .data-management .danger {
+            background: #dc3545;
+        }
+
+        .data-management .danger:hover {
+            background: #c82333;
+        }
+
+        /* Optimisations mobiles */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 10px 15px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .header-title h1 {
+                font-size: 20px;
+            }
+            
+            .header-title p {
+                font-size: 12px;
+            }
+            
+            .logo {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+            
+            .search-panel, .add-section, .results-section {
+                margin-bottom: 15px;
+                padding: 15px;
+            }
+            
+            .search-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .search-input {
+                padding: 15px;
+                font-size: 18px;
+            }
+            
+            .search-btn {
+                padding: 15px;
+                font-size: 18px;
+            }
+            
+            .filter-section {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .filter-group {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .filter-group select {
+                width: 100%;
+                padding: 12px;
+                font-size: 16px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .form-group input, .form-group select, .form-group textarea {
+                padding: 15px;
+                font-size: 16px;
+            }
+            
+            .add-btn {
+                padding: 15px;
+                font-size: 18px;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .result-card {
+                margin-bottom: 10px;
+            }
+            
+            .result-image {
+                height: 180px;
+            }
+            
+            .result-content {
+                padding: 12px;
+            }
+            
+            .result-title {
+                font-size: 16px;
+                margin-bottom: 10px;
+            }
+            
+            .result-description {
+                font-size: 14px;
+                max-height: 60px;
+            }
+            
+            .modal-content {
+                margin: 10px;
+                padding: 20px;
+                width: calc(100% - 20px);
+                max-height: 90vh;
+            }
+            
+            .modal-image {
+                max-height: 200px;
+            }
+            
+            .user-info {
+                font-size: 10px;
+            }
+
+            .data-management {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+
+            .data-management button {
+                margin: 0;
+            }
+        }
+
+        /* Optimisations tactiles */
+        .result-card, .search-btn, .add-btn, .file-input {
+            touch-action: manipulation;
+        }
+
+        /* Amélioration des zones de clic */
+        .result-card {
+            min-height: 280px;
+        }
+        
+        .filter-group select, .form-group input, .form-group select, .form-group textarea {
+            min-height: 44px;
+        }
+        
+        /* Zoom désactivé sur les inputs mobiles */
+        @media (max-width: 768px) {
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">🔎</div>
+            <div class="header-title">
+                <h1>DIAJ - Dossier Informatisé des Antécédents Judiciaires</h1>
+                <p>Base de données des enquêtes - PJ</p>
+            </div>
+            <div class="user-info">
+                <div>Agent: <strong>Osed ZABECHA</strong></div>
+                <div>Service: Brigade Criminelle</div>
+                <div>Connexion: <span id="current-time"></span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="data-management">
+            <div>
+                <strong>Gestion des données :</strong> 
+                <span id="dataCount">0</span> fichier(s) en base
+            </div>
+            <div>
+                <button onclick="exportData()">📥 Exporter</button>
+                <button onclick="importData()">📤 Importer</button>
+                <button onclick="clearData()" class="danger">🗑️ Vider la base</button>
+            </div>
+        </div>
+
+        <div class="search-panel">
+            <h2>Recherche dans la base de données</h2>
+            <div class="search-bar">
+                <input type="text" id="searchInput" class="search-input" placeholder="Rechercher par nom, numéro, adresse, description...">
+                <button class="search-btn" onclick="searchDatabase()">RECHERCHER</button>
+            </div>
+            <div class="filter-section">
+                <div class="filter-group">
+                    <label>Type:</label>
+                    <select id="typeFilter">
+                        <option value="">Tous</option>
+                        <option value="personne">Personne</option>
+                        <option value="arme">Arme</option>
+                        <option value="adresse">Adresse</option>
+                        <option value="vehicule">Véhicule</option>
+                        <option value="piece">Pièce à conviction</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Statut:</label>
+                    <select id="statusFilter">
+                        <option value="">Tous</option>
+                        <option value="actif">Actif</option>
+                        <option value="archive">Archivé</option>
+                        <option value="recherche">Recherché</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section">
+            <div class="results-header">
+                <h2>Résultats de recherche</h2>
+                <div class="results-count" id="resultsCount">0 résultat(s)</div>
+            </div>
+            <div class="results-grid" id="resultsGrid">
+                <div class="no-results">
+                    Aucun élément dans la base de données. Ajoutez des fichiers pour commencer votre enquête.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <input type="file" id="importFile" accept=".json" style="display: none;">
+
+    <script>
+        let database = [];
+        let currentResults = [];
+        
+        // Clé pour le stockage local
+        const STORAGE_KEY = 'diaj_database';
+
+        // Charger les données depuis le stockage local
+        function loadData() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    database = JSON.parse(stored);
+                    console.log(`${database.length} fichier(s) chargé(s) depuis le stockage local`);
+                } else {
+                    database = [];
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement des données:', error);
+                database = [];
+            }
+            updateDataCount();
+        }
+
+        // Sauvegarder les données dans le stockage local
+        function saveData() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(database));
+                console.log(`${database.length} fichier(s) sauvegardé(s)`);
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde:', error);
+                alert('Erreur lors de la sauvegarde des données. Votre stockage local pourrait être plein.');
+            }
+            updateDataCount();
+        }
+
+        // Mettre à jour le compteur de fichiers
+        function updateDataCount() {
+            document.getElementById('dataCount').textContent = database.length;
+        }
+
+        // Exporter les données
+        function exportData() {
+            try {
+                const dataStr = JSON.stringify(database, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `diaj_backup_${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Erreur lors de l\'export:', error);
+                alert('Erreur lors de l\'export des données.');
+            }
+        }
+
+        // Importer les données
+        function importData() {
+            document.getElementById('importFile').click();
+        }
+
+        // Vider la base de données
+        function clearData() {
+            if (confirm('Êtes-vous sûr de vouloir supprimer TOUS les fichiers de la base de données ? Cette action est irréversible.')) {
+                if (confirm('Dernière confirmation : voulez-vous vraiment vider complètement la base de données ?')) {
+                    database = [];
+                    saveData();
+                    searchDatabase();
+                    alert('Base de données vidée avec succès.');
+                }
+            }
+        }
+
+        // Gestion de l'import de fichier
+        document.getElementById('importFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        if (Array.isArray(importedData)) {
+                            if (confirm(`Voulez-vous importer ${importedData.length} fichier(s) ? Cela s'ajoutera à la base existante.`)) {
+                                database = [...database, ...importedData];
+                                saveData();
+                                searchDatabase();
+                                alert(`${importedData.length} fichier(s) importé(s) avec succès !`);
+                            }
+                        } else {
+                            alert('Format de fichier invalide. Veuillez sélectionner un fichier JSON valide.');
+                        }
+                    } catch (error) {
+                        console.error('Erreur lors de l\'import:', error);
+                        alert('Erreur lors de l\'import du fichier. Vérifiez que le fichier est un JSON valide.');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleString('fr-FR');
+        }
+
+        function searchDatabase() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const typeFilter = document.getElementById('typeFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            currentResults = database.filter(item => {
+                const matchesSearch = !searchTerm || 
+                    item.title.toLowerCase().includes(searchTerm) ||
+                    item.description.toLowerCase().includes(searchTerm) ||
+                    item.keywords.toLowerCase().includes(searchTerm) ||
+                    item.reference.toLowerCase().includes(searchTerm);
+
+                const matchesType = !typeFilter || item.type === typeFilter;
+                const matchesStatus = !statusFilter || item.status === statusFilter;
+
+                return matchesSearch && matchesType && matchesStatus;
+            });
+
+            displayResults();
+        }
+
+        function displayResults() {
+            const resultsGrid = document.getElementById('resultsGrid');
+            const resultsCount = document.getElementById('resultsCount');
+            
+            resultsCount.textContent = `${currentResults.length} résultat(s)`;
+
+            if (currentResults.length === 0) {
+                resultsGrid.innerHTML = '<div class="no-results">Aucun résultat trouvé pour cette recherche.</div>';
+                return;
+            }
+
+            resultsGrid.innerHTML = currentResults.map(item => `
+                <div class="result-card" onclick="openModal(${item.id})">
+                    <div class="result-image">
+                        ${item.image ? `<img src="${item.image}" alt="${item.title}">` : 'Aucune image'}
+                    </div>
+                    <div class="result-content">
+                        <div class="result-type ${item.type}">${item.type}</div>
+                        <div class="result-title">${item.title}</div>
+                        <div class="result-description">${item.description}</div>
+                        <div class="result-meta">
+                            <span>Réf: ${item.reference}</span>
+                            <span>Statut: ${item.
+                            status}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openModal(id) {
+            const item = database.find(item => item.id === id);
+            if (!item) return;
+
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <h2>${item.title}</h2>
+                <div class="result-type ${item.type}">${item.type}</div>
+                <br>
+                ${item.image ? `<img src="${item.image}" alt="${item.title}" class="modal-image">` : ''}
+                <p><strong>Référence:</strong> ${item.reference}</p>
+                <p><strong>Statut:</strong> ${item.status}</p>
+                <p><strong>Mots-clés:</strong> ${item.keywords}</p>
+                <p><strong>Description:</strong></p>
+                <p>${item.description}</p>
+                <p><strong>Ajouté le:</strong> ${new Date(item.dateAdded).toLocaleString('fr-FR')}</p>
+                <br>
+                <button onclick="deleteItem(${item.id})" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                    Supprimer ce fichier
+                </button>
+            `;
+            
+            document.getElementById('modal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        function deleteItem(id) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce fichier de la base de données ?')) {
+                database = database.filter(item => item.id !== id);
+                saveData();
+                searchDatabase();
+                closeModal();
+            }
+        }
+
+        function addItem(event) {
+            event.preventDefault();
+            
+            const type = document.getElementById('itemType').value;
+            const title = document.getElementById('itemTitle').value;
+            const reference = document.getElementById('itemRef').value;
+            const keywords = document.getElementById('itemKeywords').value;
+            const description = document.getElementById('itemDescription').value;
+            const status = document.getElementById('itemStatus').value;
+            const imageFile = document.getElementById('itemImage').files[0];
+            
+            if (!type || !title) {
+                alert('Veuillez remplir au moins le type et le titre.');
+                return;
+            }
+
+            const newItem = {
+                id: Date.now(),
+                type: type,
+                title: title,
+                reference: reference || '',
+                keywords: keywords || '',
+                description: description || '',
+                status: status,
+                dateAdded: new Date().toISOString(),
+                image: null
+            };
+
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    newItem.image = e.target.result;
+                    database.push(newItem);
+                    saveData();
+                    document.getElementById('addForm').reset();
+                    hideImagePreview();
+                    showSuccessMessage();
+                    searchDatabase();
+                };
+                reader.readAsDataURL(imageFile);
+            } else {
+                database.push(newItem);
+                saveData();
+                document.getElementById('addForm').reset();
+                hideImagePreview();
+                showSuccessMessage();
+                searchDatabase();
+            }
+        }
+
+        function showSuccessMessage() {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.style.display = 'block';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        function hideImagePreview() {
+            document.getElementById('imagePreview').style.display = 'none';
+        }
+
+        // Gestion de l'aperçu d'image
+        document.getElementById('itemImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('imageInfo').textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                    document.getElementById('imagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Gestion de la fermeture de modal par clic extérieur
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+
+        // Gestion de la touche Entrée pour la recherche
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchDatabase();
+            }
+        });
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            loadData();
+            searchDatabase();
+            
+            document.getElementById('addForm').addEventListener('submit', addItem);
+        });
+    </script>
+</body>
+</html>
